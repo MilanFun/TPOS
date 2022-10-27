@@ -1,0 +1,68 @@
+version: "2"
+
+services:
+  dbservice:
+    image: mysql:5.6
+    container_name: db
+    cap_add:
+      - SYS_NICE
+    ports:
+      - "13306:3306"
+    environment:
+      MYSQL_HOST: db
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DB: userdb
+    volumes:
+      - db:/var/lib/mysql
+      - ./ServiceDB/db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      app_net:
+        ipv4_address: 192.168.31.30
+  dbadder:
+    build: ./ServiceORM_DB/
+    container_name: adder
+    depends_on:
+      - dbservice
+    ports:
+      - "5000:5000"
+    volumes:
+      - adder:/code
+      - ./ServiceORM_DB/dbadder.py:/code/dbadder.py
+      - ./ServiceORM_DB/requirements.txt:/code/requirements.txt
+      - ./data.csv/:/code/data.csv
+    working_dir: /code
+    networks:
+      app_net:
+        ipv4_address: 192.168.31.31
+  webapp:
+    build: ./ServiceWEB_DB/
+    container_name: webapp
+    depends_on:
+      - dbservice
+    ports:
+      - "8000:8000"
+    volumes:
+      - webapp:/web
+      - ./ServiceWEB_DB/webapp.py:/web/webapp.py
+      - ./ServiceWEB_DB/requirements.txt:/web/requirements.txt
+    working_dir: /web
+    networks:
+      app_net:
+        ipv4_address: 192.168.31.32
+
+volumes:
+  db:
+  adder:
+  webapp:
+
+networks:
+  app_net:
+    driver: macvlan
+    driver_opts:
+      parent: wlp0s20f3
+    ipam:
+      config:
+        - subnet: "192.168.31.0/24"
+          gateway: "192.168.31.1"
