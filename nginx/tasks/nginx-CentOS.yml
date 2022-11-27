@@ -1,0 +1,18 @@
+---
+- name: Install EPEL repository
+  yum_repository:
+    name: epel
+    description: EPEL YUM repo
+    baseurl: https://download.fedoraproject.org/pub/epel/$releasever/$basearch/
+
+- name: Install nginx
+  yum:
+    pkg: nginx
+    enablerepo: epel
+    disable_gpg_check: yes
+  notify:
+    - Copy file to target machine
+    - Copy nginx configuration in place
+    - Service nginx reload
+    - Ensure nginx service is running
+    - Add cron job

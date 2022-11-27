@@ -1,0 +1,12 @@
+---
+- name: Install nginx
+  apt:
+    pkg: nginx
+    state: latest
+    update_cache: yes
+  notify:
+    - Copy file to target machine
+    - Copy nginx configuration in place
+    - Service nginx reload
+    - Ensure nginx service is running
+    - Add cron job

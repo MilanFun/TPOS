@@ -1,0 +1,35 @@
+---
+- name: Checking target availability on host for Python
+  raw: ls -l /usr/bin/python*
+  failed_when: false
+  register: check_python
+  changed_when: check_python.rc != 0
+
+- name: Preconfiguration system
+  include_tasks: preconfig.yml
+  when: check_python.rc != 0
+
+- name: Gather facts about target host
+  setup:
+    filter:
+      - 'ansible_distribution'
+
+- name: Include variables for respective os.
+  include_vars: "{{ ansible_distribution }}.yml"
+
+- name: Installing nginx...
+  include_tasks: "nginx-{{ ansible_distribution }}.yml"
+
+- name: Force notified handlers
+  meta: flush_handlers
+
+- name: Check for changes in service_state file
+  lineinfile:
+    path: /opt/service_state
+    line: "Seems work"
+    state: present
+  check_mode: yes
+  register: presence
+  changed_when: presence.changed
+  notify:
+    - Service nginx restart

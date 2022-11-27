@@ -1,0 +1,3 @@
+---
+nginx_user: nginx
+nginx_pid_file: /var/run/nginx.pid

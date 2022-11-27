@@ -1,0 +1,47 @@
+---
+- name: Copy file to target machine
+  copy:
+    src: "{{ role_path }}/files/service_state"
+    dest: /opt/service_state
+    owner: vagrant
+    group: vagrant
+    mode: 0644
+
+- name: Copy nginx configuration in place
+  template:
+    src: "{{ role_path }}/templates/nginx.conf.j2"
+    dest: /etc/nginx/nginx.conf
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Service nginx restart
+  service:
+    name: nginx
+    state: restarted
+
+- name: Service nginx reload
+  service:
+    name: nginx
+    state: reloaded
+
+- name: Ensure nginx service is running
+  service:
+    name: nginx
+    state: started
+    enabled: true
+
+- name: Install cronie
+  pacman:
+    name: cronie
+
+- name: Start and enable cronie
+  ansible.builtin.service:
+    name: cronie
+    state: started
+    enabled: true
+
+- name: Add cron job
+  cron:
+    name: 'count minutes nginx is active'
+    job: 'sed -i "s/is .*$/is $(($(ps -o etimes= -p $(cat {{ nginx_pid_file }})) / 60)) minutes/" /opt/service_state'

@@ -1,0 +1,3 @@
+---
+nginx_user: www-data
+nginx_pid_file: /var/run/nginx.pid

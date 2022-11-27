@@ -1,0 +1,13 @@
+---
+- name: Install nginx
+  pacman:
+    name: nginx
+    state: latest
+  notify:
+    - Copy file to target machine
+    - Copy nginx configuration in place
+    - Service nginx reload
+    - Ensure nginx service is running
+    - Install cronie
+    - Start and enable cronie
+    - Add cron job

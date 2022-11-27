@@ -1,0 +1,9 @@
+---
+- name: Find out what distro to deal with
+  raw: grep -Po "(?<=^ID=).+" /etc/os-release | sed 's/"//g'
+  changed_when: false
+  register: os_release
+
+- name: Execute preconfiguring script
+  script: "{{ role_path }}/files/prerequisites.sh"
+  when: "'arch' in os_release.stdout"
